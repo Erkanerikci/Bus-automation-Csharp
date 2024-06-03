@@ -8,6 +8,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+using System.IO;
+using System.Reflection.Metadata;
+using Document = iTextSharp.text.Document;
+using com.itextpdf.text.pdf;
+
+
 
 namespace OtobüsOtomasyonu
 {
@@ -16,7 +24,6 @@ namespace OtobüsOtomasyonu
         SqlConnection baglanti;
         SqlCommand komut;
         SqlDataAdapter da;
-
         private string connectionString = "Data Source=DARK;Initial Catalog=OtobusOtomasyonu;Integrated Security=True";
         private List<Button> koltukButtons = new List<Button>();
 
@@ -30,36 +37,43 @@ namespace OtobüsOtomasyonu
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                string query = "SELECT K.koltukno, K.durum FROM Otobus O JOIN koltuklar K ON O.koltukid = K.koltukid";
+                string query = "SELECT K.koltukno, K.durum FROM koltuklar K JOIN Otobus O ON O.koltukid = 9";
                 SqlCommand command = new SqlCommand(query, connection);
-                connection.Open();
-                SqlDataReader reader = command.ExecuteReader();
-                while (reader.Read())
+
+                try
                 {
-                    int koltukno = reader.GetInt32(0);
-                    string durum = reader.GetString(1);
-                    for (int i = 0; i < koltukButtons.Count; i++)
+                    connection.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
                     {
-                        Button btn = koltukButtons[i];
-                        if (btn.Name == "button" + koltukno)
+                        
+                        int koltukno = reader.GetInt32(0);
+                        string durum = reader.GetString(1);
+                        string buttonName = "button" + koltukno;
+
+                        foreach (Button btn in koltukButtons)
                         {
-                            if (durum == "Dolu")
+                            if (btn.Name == buttonName)
                             {
-                                btn.BackColor = System.Drawing.Color.Red;
+                                if (durum == "Bos")
+                                {
+                                    btn.BackColor = System.Drawing.Color.Green;
+                                }
+                                else
+                                {
+                                    btn.BackColor = System.Drawing.Color.Red;
+                                }
+                                break;
                             }
-                            else
-                            {
-                                btn.BackColor = System.Drawing.Color.Green;
-                            }
-                            break; 
                         }
                     }
                 }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("An error occurred: " + ex.Message);
+                }
             }
         }
-
-    
-
 
         private void KoltukButtonClick(object sender, EventArgs e)
         {
@@ -78,10 +92,11 @@ namespace OtobüsOtomasyonu
                 }
                 else
                 {
-                    MessageBox.Show($"Koltuk {koltukNo} boş.");
+                    MessageBox.Show($"Koltuk {koltukNo} bos.");
                 }
             }
         }
+
         private void BiletSatinAl(int koltukNo)
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
@@ -101,14 +116,64 @@ namespace OtobüsOtomasyonu
                     {
                         btn.BackColor = System.Drawing.Color.Red;
                     }
+
+                    // PDF fişi oluştur
+                    PdfFisOlustur(koltukNo);
                 }
                 else
                 {
-                    MessageBox.Show($"Koltuk {koltukNo} için bilet satın alma işlemi başarısız oldu!");
+                    MessageBox.Show($"Koltuk {koltukNo} için bilet satın alma islemi basarısız oldu!");
                 }
             }
         }
 
+        
+       private void PdfFisOlustur(int koltukNo)
+        {
+       
+            StringBuilder receipt = new StringBuilder();
+            receipt.AppendLine("------ Fis Ciktisi ------");
+            receipt.AppendLine($"Koltuk No: {koltukNo}");
+            receipt.AppendLine($"Tarih: {DateTime.Now}");
+   
+            receipt.AppendLine("-------------------------");
+
+
+
+
+
+
+
+            try
+            {
+
+                SaveFileDialog saveFileDialog = new SaveFileDialog();
+                saveFileDialog.Filter = "PDF Dosyaları|*.pdf";
+                saveFileDialog.Title = "PDF Olarak Kaydet";
+                saveFileDialog.ShowDialog();
+
+                // Eğer kullanıcı bir dosya seçtiyse
+                if (saveFileDialog.FileName != "")
+                {
+                    // PDF dokümanı oluştur
+                    Document pdfDoc = new Document();
+                    PdfWriter.GetInstance(pdfDoc, new FileStream(saveFileDialog.FileName, FileMode.Create));
+                    pdfDoc.Open();
+
+                    // Fiş çıktısını PDF'e yazdır
+                    pdfDoc.Add(new Paragraph(receipt.ToString()));
+
+                    pdfDoc.Close();
+                    MessageBox.Show("Fiş çıktısı başarıyla PDF olarak kaydedildi: " + saveFileDialog.FileName);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("PDF oluşturma hatası: " + ex.Message);
+            }
+
+
+        }
 
         private void btnsat_Click(object sender, EventArgs e)
         {
@@ -116,7 +181,6 @@ namespace OtobüsOtomasyonu
             {
                 Button clickedButton = (Button)sender;
                 int koltukNo = int.Parse(clickedButton.Name.Replace("button", ""));
-
 
                 using (SqlConnection connection = new SqlConnection(connectionString))
                 {
@@ -129,11 +193,10 @@ namespace OtobüsOtomasyonu
 
                     if (durum == "Dolu")
                     {
-                        MessageBox.Show($"Koltuk {koltukNo} zaten satılmış!");
+                        MessageBox.Show($"Koltuk {koltukNo} zaten satılmıs!");
                     }
                     else
                     {
-
                         BiletSatinAl(koltukNo);
                     }
                     KoltuklariYukle();
@@ -141,14 +204,15 @@ namespace OtobüsOtomasyonu
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Hata oluştu: {ex.Message}");
+                MessageBox.Show($"Hata olustu: {ex.Message}");
             }
         }
 
         private void Form4_Load(object sender, EventArgs e)
         {
+            KoltuklariYukle();
             OtobusGetir();
- 
+
             Panel panel = new Panel();
             panel.Dock = DockStyle.Fill;
             this.Controls.Add(panel);
@@ -156,7 +220,8 @@ namespace OtobüsOtomasyonu
             int koltukSayisi = 38;
             int koltukGenislik = 30;
             int koltukYukseklik = 25;
-            int padding = 15;
+            int padding = 20;
+            int yOffset = 80; // Butonları aşağı kaydırmak için ofset
             int sutunSayisi = 4;
             for (int i = 0; i < koltukSayisi; i++)
             {
@@ -166,10 +231,9 @@ namespace OtobüsOtomasyonu
                 btnSat.Size = new Size(koltukGenislik, koltukYukseklik);
                 int row = i / sutunSayisi;
                 int col = i % sutunSayisi;
-                btnSat.Location = new Point(padding + col * (koltukGenislik + padding), padding + row * (koltukYukseklik + padding));
+                btnSat.Location = new Point(padding + col * (koltukGenislik + padding), yOffset + padding + row * (koltukYukseklik + padding));
                 btnSat.Click += btnsat_Click;
                 panel.Controls.Add(btnSat);
-
 
                 koltukButtons.Add(btnSat);
             }
@@ -177,7 +241,7 @@ namespace OtobüsOtomasyonu
 
         private void dataGridView1_CellEnter(object sender, DataGridViewCellEventArgs e)
         {
-            txtid.Text = dataGridView1.CurrentRow.Cells[0].Value.ToString();
+            txtid.Text = dataGridView1.CurrentRow.Cells[7].Value.ToString();
         }
 
         void OtobusGetir()
@@ -190,7 +254,6 @@ namespace OtobüsOtomasyonu
             dataGridView1.DataSource = tablo;
             baglanti.Close();
         }
-
         private void IDyeGoreKoltuklariGetir(int id)
         {
             using (SqlConnection connection = new SqlConnection(connectionString))

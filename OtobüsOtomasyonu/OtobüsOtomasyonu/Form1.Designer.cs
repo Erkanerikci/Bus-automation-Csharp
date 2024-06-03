@@ -50,7 +50,7 @@
             button1.Name = "button1";
             button1.Size = new Size(75, 21);
             button1.TabIndex = 1;
-            button1.Text = "Giriş";
+            button1.Text = "Giris";
             button1.UseVisualStyleBackColor = true;
             button1.Click += button1_Click;
             // 
@@ -68,7 +68,7 @@
             label2.Name = "label2";
             label2.Size = new Size(39, 15);
             label2.TabIndex = 0;
-            label2.Text = "Şifre : ";
+            label2.Text = "sifre : ";
             // 
             // textBox2
             // 

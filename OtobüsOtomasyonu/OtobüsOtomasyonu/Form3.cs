@@ -57,8 +57,7 @@ namespace OtobüsOtomasyonu
         private void button1_Click(object sender, EventArgs e)
         {
             byte[] imageData = ImageToByteArray(pictureBox1.Image);
-            string sorgu = "INSERT INTO Otobus(id, firma, kalkacak, inecek,saat,fiyat, resim) VALUES(@id, @firma, @kalkacak, @inecek,@saat,@fiyat, @resim)" +
-                "INSERT INTO koltuklar (koltukno, durum)\r\nVALUES \r\n    (1, 'Boş'),\r\n    (2, 'Boş'),\r\n    (3, 'Boş'),\r\n    (4, 'Boş'),\r\n    (5, 'Boş'),\r\n    (6, 'Boş'),\r\n    (7, 'Boş'),\r\n    (8, 'Boş'),\r\n    (9, 'Boş'),\r\n    (10, 'Boş'),\r\n    (11, 'Boş'),\r\n    (12, 'Boş'),\r\n    (13, 'Boş'),\r\n    (14, 'Boş'),\r\n    (15, 'Boş'),\r\n    (16, 'Boş'),\r\n    (17, 'Boş'),\r\n    (18, 'Boş'),\r\n    (19, 'Boş'),\r\n    (20, 'Boş'),\r\n    (21, 'Boş'),\r\n    (22, 'Boş'),\r\n    (23, 'Boş'),\r\n    (24, 'Boş'),\r\n    (25, 'Boş'),\r\n    (26, 'Boş'),\r\n    (27, 'Boş'),\r\n    (28, 'Boş'),\r\n    (29, 'Boş'),\r\n    (30, 'Boş'),\r\n    (31, 'Boş'), \r\n    (32, 'Boş'), \r\n    (33, 'Boş'),\r\n    (34, 'Boş'),\r\n    (35, 'Boş'), \r\n    (36, 'Boş'), \r\n    (37, 'Boş'), \r\n    (38, 'Boş'); ";
+            string sorgu = "INSERT INTO Otobus(id, firma, kalkacak, inecek,saat,fiyat, resim) VALUES(@id, @firma, @kalkacak, @inecek,@saat,@fiyat, @resim)" ;
             komut = new SqlCommand(sorgu, baglanti);
             komut.Parameters.AddWithValue("@id", txtno.Text);
             komut.Parameters.AddWithValue("@firma", txtfirma.Text);
@@ -160,7 +159,7 @@ namespace OtobüsOtomasyonu
 
                             guncellemeCommand.ExecuteNonQuery();
 
-                            MessageBox.Show("Öğrenci bilgileri ve resmi başarıyla güncellendi.");
+                            MessageBox.Show("Öğrenci bilgileri ve resmi basarıyla güncellendi.");
                         }
                     }
                     else

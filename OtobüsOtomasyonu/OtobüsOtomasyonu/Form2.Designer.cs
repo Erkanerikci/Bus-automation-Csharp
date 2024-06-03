@@ -48,7 +48,7 @@
             button2.Name = "button2";
             button2.Size = new Size(102, 73);
             button2.TabIndex = 0;
-            button2.Text = "Bilet Satış Işlemi";
+            button2.Text = "Bilet Satıs Islemi";
             button2.UseVisualStyleBackColor = true;
             button2.Click += button2_Click;
             // 

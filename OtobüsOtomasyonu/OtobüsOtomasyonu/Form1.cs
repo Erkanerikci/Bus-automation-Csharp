@@ -30,7 +30,7 @@ namespace OtobüsOtomasyonu
             }
             else
             {
-                MessageBox.Show("Kullanıcı Adı veya şifre hatalı");
+                MessageBox.Show("Kullanıcı Adı veya sifre hatalı");
             }
 
 
